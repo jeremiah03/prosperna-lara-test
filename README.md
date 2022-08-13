@@ -8,4 +8,5 @@
 </p>
 
 ## INSTALLATION
+- Create 
 - RUN COMMAND ```php artisan migrate:fresh --seed```
