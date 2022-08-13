@@ -8,4 +8,4 @@
 </p>
 
 ## INSTALLATION
-- RUN COMmAND ```php artisan migrate:fresh --seed```
+- RUN COMMAND ```php artisan migrate:fresh --seed```
