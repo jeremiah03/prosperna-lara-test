@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
+        return view('pages.product-dashboard');
+    }
+
+    public function data()
+    {
+        return Product::with('category')->get();
     }
 
     /**
@@ -24,7 +26,10 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('pages.product-create', [
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -35,7 +40,24 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // return $request->all();
+        $filename = null;
+        if ($request->hasFile('img_thumbnail')) {
+            $file = $request->file('img_thumbnail');
+            $filename = $file->store('public');
+        }
+        $data = $request->except('_token', '_method');
+        $data['img_thumbnail'] = str_replace('public/', '', $filename);;
+
+        // return $data;
+
+        Product::create($data);
+
+        return redirect()->route('product.index')
+            ->with([
+                'status' => 'success',
+                'message' => 'Product successfully added!'
+            ]);
     }
 
     /**
@@ -46,7 +68,10 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+
+        return view('pages.product-preview', [
+            'product' => $product
+        ]);
     }
 
     /**
@@ -57,7 +82,12 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        //
+        $categories = Category::all();
+
+        return view('pages.product-create', [
+            'categories' => $categories,
+            'product' => $product
+        ]);
     }
 
     /**
@@ -69,7 +99,25 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        //
+        $filename = null;
+        if ($request->hasFile('img_thumbnail')) {
+            $file = $request->file('img_thumbnail');
+            $filename = $file->store('public');
+
+            //Delete img
+            Storage::disk('public')->delete($product->img_thumbnail);
+        }
+
+        $data = $request->except('_token', '_method');
+        $data['img_thumbnail'] = str_replace('public/', '', $filename);
+
+        $product->fill($data)->update();
+
+        return redirect()->route('product.index')
+            ->with([
+                'status' => 'success',
+                'message' => 'Product successfully updated!'
+            ]);
     }
 
     /**
