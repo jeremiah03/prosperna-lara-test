@@ -9,6 +9,16 @@ use Illuminate\Http\Request;
 
 class CheckOutController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the checkout page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
     public function index(Request $request)
     {
         if (!$request->cart) {
@@ -17,7 +27,6 @@ class CheckOutController extends Controller
 
         $cart = Cart::with('product')->whereIn('id', explode(',', $request->cart))->get();
 
-        // return $cart;
         return view('pages.checkout', [
             'cart' => $cart
         ]);
@@ -25,12 +34,9 @@ class CheckOutController extends Controller
 
     public function checkout(Request $request)
     {
-        // return $request->all();
         $cart = Cart::with('product')->whereIn('id', $request->item)->get();
         $sum = 0;
-        foreach ($cart as $item) {
-            $sum += $item->quantity * $item->product->price;
-        }
+
 
         $checkout = CheckOut::create([
             'user_id' => auth()->user()->id,
@@ -42,8 +48,9 @@ class CheckOutController extends Controller
             'total_amount' => $sum,
         ]);
 
-
         foreach ($cart as $item) {
+            $sum += $item->quantity * $item->product->price;
+
             CheckOutProduct::create([
                 'check_out_id' => $checkout->id,
                 'product_id' => $item->product->id,
@@ -54,6 +61,8 @@ class CheckOutController extends Controller
             $item->delete();
         }
 
+        $checkout->total_amount = $sum;
+        $checkout->save();
 
         return redirect()->route('checkout.complete');
     }

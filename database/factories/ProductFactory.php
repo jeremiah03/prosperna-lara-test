@@ -27,7 +27,12 @@ class ProductFactory extends Factory
     public function definition()
     {
         return [
-            'category_id' => Category::class,
+            'category_id' => function ($category_id) {
+                if($category_id) {
+                    return $category_id;
+                }
+                return Category::class;
+            },
             'name' => fake()->word(),
             'img_thumbnail' => fake()->imageUrl(450, 300),
             'description' => fake()->text(),

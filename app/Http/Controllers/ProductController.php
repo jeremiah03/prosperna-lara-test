@@ -9,20 +9,30 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    /**
+     * Show the product dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
     public function index()
     {
         return view('pages.product-dashboard');
     }
 
+    /**
+     * Get products.
+     *
+     * @return \App\Models\Product
+     */
     public function data()
     {
         return Product::with('category')->get();
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show product create page.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function create()
     {
@@ -33,14 +43,13 @@ class ProductController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Create new product.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        // return $request->all();
         $filename = null;
         if ($request->hasFile('img_thumbnail')) {
             $file = $request->file('img_thumbnail');
@@ -48,8 +57,6 @@ class ProductController extends Controller
         }
         $data = $request->except('_token', '_method');
         $data['img_thumbnail'] = str_replace('public/', '', $filename);;
-
-        // return $data;
 
         Product::create($data);
 
@@ -61,24 +68,23 @@ class ProductController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Show product preview page.
      *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @param  \App\Models\Product $product
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function show(Product $product)
     {
-
         return view('pages.product-preview', [
             'product' => $product
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show product edit page.
      *
-     * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @param  \App\Models\Product $product
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function edit(Product $product)
     {
